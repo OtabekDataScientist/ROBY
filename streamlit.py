@@ -5,6 +5,9 @@ import cv2
 import wget
 import numpy as np 
 import tensorflow as tf 
+import torchvision.transforms as transforms
+from PIL import Image
+
 from model import *
 
 
@@ -12,9 +15,14 @@ def main():
     RESNET_LAST_ONLY = False
     class_names = ['cardboard', 'glass', 'metal', 'paper', 'plastic', 'trash']
     COMPARTMENTS = ['Cardboard', 'Glass', 'Metal', 'Paper', 'Plastic', 'Trash']
+    transform = transforms.Compose([
+        transforms.Resize(384),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+
 
     st.title('RobyNet neural network for trash classification')
-
     st.write('This app shows the demo of how we are going to streamline the process of cluttering the trash to distinc recycle compartments using computer vision')
     #st.subheader('You may find all the details as below')
     
@@ -37,24 +45,34 @@ def main():
         model.eval()
         file_bytes = np.asarray(bytearray(image.read()), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, 1)
-        out = cv2.resize(img, (343, 343))
-    
-        show_img = cv2.resize(img, (512,512))
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img_pil = Image.fromarray(img)
+        #out = cv2.resize(img, (512, 384))
+
+
+        show_img = cv2.resize(img, (512,384))
         st.image(show_img, caption= 'This is the uploaded image', channels="BGR")
 
         #img_input = cv2.cvtColor(out, cv2.COLOR_BGR2GRAY)
-        out = out/255
-        model_input = out.reshape(1,3,343,343)
+        #out = out/255
         
-        out_tensor = torch.from_numpy(model_input)
+        #out = np.transpose(out)
+        #model_input = np.asarray([out])
+        #print(np.shape(model_input))
+        
+        #out_tensor = torch.from_numpy(model_input)
+        img_out = transform(img_pil)
+        out_tensor = torch.unsqueeze(img_out, 0)
         outputs = model.forward(out_tensor.float())
         _, preds = torch.max(outputs.data, 1)
 
         predlabels = preds.cpu().numpy()
         st.warning("Here is what neural network thinks: ")
         st.write('')
+    
         #labels_num = labels.cpu().numpy()
         softmax_outs = outputs.softmax(dim=1)
+        print(softmax_outs)
         softmax_np = softmax_outs.cpu().detach().numpy()
         percentages = softmax_np/np.sum(softmax_np)
         #print(percentages)
