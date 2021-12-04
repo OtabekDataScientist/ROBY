@@ -16,7 +16,6 @@ if sys.version_info[0] == 2:
 else:
 		import pickle
 
-from skimage.transform import resize
 
 
 class PreTrainedResNet(nn.Module):
