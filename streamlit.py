@@ -26,7 +26,8 @@ def main():
     #model = PreTrainedResNet(len(class_names),RESNET_LAST_ONLY)
     #model.cuda()
     #model.load_state_dict(torch.load('resnet_roby_state.pt'))
-    model_pt = download()
+    #model_pt = download()
+    model_pt = torch.load('resnet_rb.pt')
     #for param_tensor in model.state_dict():
     #    print(param_tensor, "\t", model.state_dict()[param_tensor].size())
     if image is not None:
@@ -95,8 +96,8 @@ def download():
     wget.download(img3_link, img3)
     wget.download(img4_link, img4)
     wget.download(model_link, filename_model)
-    model_pt = torch.load('resnet_rb.pt')
-    return model_pt
+    
+    #return model_pt
     
 
 
