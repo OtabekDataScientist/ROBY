@@ -34,33 +34,23 @@ def main():
     device = torch.device('cpu')
     model = PreTrainedResNet(len(class_names),RESNET_LAST_ONLY)
     
-    #model.cuda()
     model.load_state_dict(torch.load('robynet_state.pt', map_location=device))
-    #model_pt = download()
-    
-    #model_pt = torch.load('resnet_rb.pt')
+
     #for param_tensor in model.state_dict():
     #    print(param_tensor, "\t", model.state_dict()[param_tensor].size())
+    
     if image is not None:
         model.eval()
         file_bytes = np.asarray(bytearray(image.read()), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, 1)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img_pil = Image.fromarray(img)
-        #out = cv2.resize(img, (512, 384))
 
 
         show_img = cv2.resize(img, (512,384))
         st.image(show_img, caption= 'This is the uploaded image', channels="BGR")
 
-        #img_input = cv2.cvtColor(out, cv2.COLOR_BGR2GRAY)
-        #out = out/255
-        
-        #out = np.transpose(out)
-        #model_input = np.asarray([out])
-        #print(np.shape(model_input))
-        
-        #out_tensor = torch.from_numpy(model_input)
+
         img_out = transform(img_pil)
         out_tensor = torch.unsqueeze(img_out, 0)
         outputs = model.forward(out_tensor.float())
@@ -70,12 +60,11 @@ def main():
         st.warning("Here is what neural network thinks: ")
         st.write('')
     
-        #labels_num = labels.cpu().numpy()
         softmax_outs = outputs.softmax(dim=1)
-        print(softmax_outs)
+        
         softmax_np = softmax_outs.cpu().detach().numpy()
         percentages = softmax_np/np.sum(softmax_np)
-        #print(percentages)
+
         col0, col1, col2, col3, col4, col5 = st.columns(6)
 
         col0.metric(COMPARTMENTS[0], str(round(percentages[0][0]*100,1))+ " %")
@@ -84,7 +73,7 @@ def main():
         col3.metric(COMPARTMENTS[3], str(round(percentages[0][3]*100,1))+ " %")
         col4.metric(COMPARTMENTS[4], str(round(percentages[0][4]*100,1))+ " %")
         col5.metric(COMPARTMENTS[5], str(round(percentages[0][5]*100,1))+ " %")
-        #print(predlabels)
+        
         st.success('The final class is ' + COMPARTMENTS[predlabels[0]])
     st.write("----------------------")
     st.subheader('Here is some image examples that has been used to train the neural network')
@@ -120,8 +109,6 @@ def download():
     wget.download(img4_link, img4)
     wget.download(model_state_link, filename_state)
     #wget.download(model_link, filename_model)
-    
-    #return model_pt
     
 
 
