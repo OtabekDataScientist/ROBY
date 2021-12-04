@@ -48,7 +48,7 @@ def main():
 
 
         show_img = cv2.resize(img, (512,384))
-        st.image(show_img, caption= 'This is the uploaded image', channels="RGB")
+        st.image(image, caption= 'This is the uploaded image')
 
 
         img_out = transform(img_pil)
