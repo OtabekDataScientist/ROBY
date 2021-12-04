@@ -48,7 +48,7 @@ def main():
 
 
         show_img = cv2.resize(img, (512,384))
-        st.image(show_img, caption= 'This is the uploaded image', channels="BGR")
+        st.image(show_img, caption= 'This is the uploaded image', channels="RGB")
 
 
         img_out = transform(img_pil)
@@ -61,7 +61,7 @@ def main():
         st.write('')
     
         softmax_outs = outputs.softmax(dim=1)
-        
+
         softmax_np = softmax_outs.cpu().detach().numpy()
         percentages = softmax_np/np.sum(softmax_np)
 
