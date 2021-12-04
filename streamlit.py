@@ -5,7 +5,7 @@ import cv2
 import wget
 import numpy as np 
 import tensorflow as tf 
-
+from model import *
 
 
 def main():
@@ -19,20 +19,22 @@ def main():
     #st.subheader('You may find all the details as below')
     
     st.write('----------------------------------')
-
+    download()
     st.subheader('Here you may upload or take a picture to test the neural network')
     st.warning('Testing accuracy is 93.42% with the WasteNet dataset')
     image = st.file_uploader("Upload the image here")
-    #model = PreTrainedResNet(len(class_names),RESNET_LAST_ONLY)
+    device = torch.device('cpu')
+    model = PreTrainedResNet(len(class_names),RESNET_LAST_ONLY)
+    
     #model.cuda()
-    #model.load_state_dict(torch.load('resnet_roby_state.pt'))
+    model.load_state_dict(torch.load('robynet_state.pt', map_location=device))
     #model_pt = download()
-    download()
-    model_pt = torch.load('resnet_rb.pt')
+    
+    #model_pt = torch.load('resnet_rb.pt')
     #for param_tensor in model.state_dict():
     #    print(param_tensor, "\t", model.state_dict()[param_tensor].size())
     if image is not None:
-        model_pt.eval()
+        model.eval()
         file_bytes = np.asarray(bytearray(image.read()), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, 1)
         out = cv2.resize(img, (343, 343))
@@ -45,7 +47,7 @@ def main():
         model_input = out.reshape(1,3,343,343)
         
         out_tensor = torch.from_numpy(model_input)
-        outputs = model_pt.forward(out_tensor.float())
+        outputs = model.forward(out_tensor.float())
         _, preds = torch.max(outputs.data, 1)
 
         predlabels = preds.cpu().numpy()
@@ -86,17 +88,20 @@ def download():
     img3 = 'img3.jpg'
     img4 = 'img4.jpg'
     filename_model = 'resnet_rb.pt'
+    filename_state = 'robynet_state.pt'
     img1_link = 'https://www.dropbox.com/s/bcyvbrvvad24bzi/trash28.jpg?dl=1'
     img2_link = 'https://www.dropbox.com/s/s6usccgjng4yvio/glass17.jpg?dl=1'
     img3_link = 'https://www.dropbox.com/s/168rx6kqhten493/metal89.jpg?dl=1'
     img4_link = 'https://www.dropbox.com/s/4t515zwgomhea0n/paper121.jpg?dl=1'
     model_link = 'https://www.dropbox.com/s/jzx0vno3w9aht9e/resnet_roby.pt?dl=1'
-    
+    model_state_link = 'https://www.dropbox.com/s/5u897aymb38z4ya/resnet_roby_state.pt?dl=1'
+
     wget.download(img1_link, img1)
     wget.download(img2_link, img2)
     wget.download(img3_link, img3)
     wget.download(img4_link, img4)
-    wget.download(model_link, filename_model)
+    wget.download(model_state_link, filename_state)
+    #wget.download(model_link, filename_model)
     
     #return model_pt
     
